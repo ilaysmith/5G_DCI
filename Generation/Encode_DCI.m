@@ -18,8 +18,12 @@ end
 % у Валентина
 codeword = attachParityBits(dci,crc_type);
 
-% Channel coding. polarCoding - взято у Валентина
+% Channel coding. polarCoding - взято у Валентина. Добавил динамическую
+% длину и исправил цикл с формированием G_N
 codeword = polarCoding(codeword); 
+
+%codewordnew = nrPolarEncode(codeword,length(codeword)); 
+%isequal(codeword,codewordnew)
 
 % Rate matching - взято у Валентина
 codeword = rateMatching(codeword);
