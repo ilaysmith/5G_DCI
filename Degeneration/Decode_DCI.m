@@ -7,12 +7,12 @@ end
 
 % CRC   use crc_type = 'crc24c', bitstream = received_codeword . rateRecovery - взято
 % у Dimach24
-received_codeword = rateRecovery(received_codeword);
+received_codeword = rateRecovery(received_codeword); % корректно. получаем тот же результат
 
 % Channel decoding. polarDecoding - взято у Dimach24
-received_codeword = polarDecoding(received_codeword); 
+received_codeword = polarDecoding(received_codeword); % не корректно. результат нули
 
-% verifeParyity - взято у Dimach24
+% verifeParity - взято у Dimach24
 get_DM = verifyParity(received_codeword, crc_type);
 
 %get_DM = received_codeword;

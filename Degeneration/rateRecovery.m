@@ -14,7 +14,7 @@ function out_seq = bitSelection(bits)
     end
     E = 864;    % determined [TS 38.212, 7.1.5]
     N = 512;    % length of output sequence
-    K = 56;     % length of output sequence of further polar decoder
+    K = 63;     % length of output sequence of further polar decoder %%%56
     if E >= N
         out_seq(mod(0:(E-1),N)+1) = bits(1:E);
         return

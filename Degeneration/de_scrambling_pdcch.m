@@ -4,8 +4,9 @@ arguments
     codeword
     n_RNTI
     nID
-end
+end 
 
 descrambling_bits = scrambling_pdcch(codeword, n_RNTI, nID);
+
 end
 
