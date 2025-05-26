@@ -1,19 +1,46 @@
-% function Decode_DCI for dci sequence 
-function get_DM = Decode_DCI(received_codeword, crc_type)
+function dcibits = Decode_DCI(...
+    dcicw,                         ... 
+    crc_type                       ... % must be "crc<length><?letter>" letter is only necessary crc24_
+    )
+
 arguments
-    received_codeword
-    crc_type
+    dcicw (1,:) % vector string
+    %bitstream
+    crc_type string
+    %attach_zeros=true
+
 end
 
-% CRC   use crc_type = 'crc24c', bitstream = received_codeword . rateRecovery - взято
-% у Dimach24
-received_codeword = rateRecovery(received_codeword); % корректно. получаем тот же результат
+% rate recovery
+dcibitsRR = rateRecovery(dcicw);
 
-% Channel decoding. polarDecoding - взято у Dimach24
-received_codeword = polarDecoding(received_codeword); % не корректно. результат нули
+% rate recovery test (do not test)
+Edci = length(dcicw);
+Kout = 39;
+nMax = 9; 
+K = Kout+24;            % K includes CRC bits
+N = nr5g.internal.polar.getN(K,Edci,nMax);
+recBlk = nrRateRecoverPolar(dcicw.',K,N); %matlab function
+isequal(recBlk, dcibitsRR.');
 
-% verifeParity - взято у Dimach24
-get_DM = verifyParity(received_codeword, crc_type);
+% polar decoding
+dcibitsPD = polarDecoding(dcibitsRR); 
 
-%get_DM = received_codeword;
+%polar decoding test
+rnti = 1;
+L = 8; %power of 2
+padCRC = false;              % signifies input prepadding with ones
+decBlk = nrPolarDecode(recBlk,K,Edci,L,padCRC, rnti); %matlab function
+isequal(decBlk.', dcibitsPD) ;
+
+
+%verify parity
+[dcibits,verification_success] = verifyParity(dcibitsPD,crc_type);
+
+%verify parity test
+%[padDCIBits,mask] = nrCRCDecode([ones(24,1);decBlk],'24C',rnti);
+[padDCIBits,mask] = nrCRCDecode(decBlk,'24C'); %matlab function
+%dciBits = cast(padDCIBits(25:end,1),'int8'); % remove the prepadding
+isequal(padDCIBits, dcibits.') ;
+
 end
