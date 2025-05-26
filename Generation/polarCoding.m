@@ -31,9 +31,9 @@ function out_seq = polarCoding(in_seq)
     out_seq(i) = in_seq(P(i)+1);
     end
     
-   K = 63; 
+    
    N = 512; 
-  %K = length(in_seq)
+   K = length(in_seq)
   %N = 2^ceil(log2(K)); 
 
     Q_0_Nmax = matfile("ReliabilityAndPolarCodingSeqIndexes.mat").ReliabilityAndPolarSeqIndexes.';
