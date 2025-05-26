@@ -1,37 +1,45 @@
 
-% test 
-%function resource_grid = test_dci(crc_type)
-%arguments 
-%    crc_type
-%end
+% test
 
-% введём параметры для функции getDCI   unit test matlab, общий гит с 3-мя
-% папками. что то у ребят с ofdm как то встроить
-FDRA = 11; % 10,19967 округляется в большую сторону
+% denote getDCI parameters
+FDRA = 10;
 TDRA = 1;
 VrbPrb = 0;
 modulation_and_coding_scheme = 0;
 redundancy_Version = 0;
-sII = 0b0;
-reserved_bits = 0; % zeros(0,15)
+SII = 0;
+ReservedBits = zeros(1,15);
 
-% получим биты dci для формата format 1_0 в соответствие со стандартом
-DM = getDCI(FDRA, TDRA, VrbPrb,modulation_and_coding_scheme,redundancy_Version,sII, reserved_bits);
+% get dci format 1_0 according to the TS
+DM = genDCI(FDRA, TDRA, VrbPrb,modulation_and_coding_scheme,redundancy_Version, SII,ReservedBits);
 
-% закодируем биты полезной нагрузки 38.212 с использование CRC attachment (раздел 7.3.2),
-% Channel coding (7.3.3), Rate mathcing (раздел 7.3.4).
+% payload coding 38.212: CRC attachment (7.3.2),
+% Channel coding (7.3.3), Rate mathcing (7.3.4).
 crc_type = 'crc24c';
 
+%encoding
 codeword = Encode_DCI(DM,crc_type);
 
-% попытка сравнения с функция nrDCIEncode
-bit_string = '10100001000000000000000000000000';
-bit_vector = double(bit_string') - '0';  % Преобразуем в числовой вектор-столбец
+%dci encoding test
+nID = 2;  % задать у ребят 250
+n_RNTI = 1; % задано стандартом 65535
+codeword_test = nrDCIEncode(DM.',n_RNTI, 864);
+isequal(codeword_test, codeword .');
+
+%decoding
+dcibits = Decode_DCI(codeword,crc_type);
+
+%dci decoding test
+K = 39;
+L = 8;
+dcibits_test = nrDCIDecode(codeword.',K,L,n_RNTI);
+isequal(dcibits_test, dcibits .');
+
+%common test (our functions)
+isequal(DM, dcibits)
 
 % Get the PDCCH QPSK symbols nrPDCCH
 
-nID = 2;  % задать у ребят 250
-n_RNTI = 1; % задано стандартом 65535
 symbols = get_pdcch_symbols(codeword, nID, n_RNTI);
 
 %symbols_2 = nrDCIEncode(bit_vector,n_RNTI, 2*length(DM)); % третий параметр не такой!
