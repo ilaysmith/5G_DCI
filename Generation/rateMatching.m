@@ -4,8 +4,7 @@ function out_seq = rateMatching(in_seq)
     arguments
         in_seq (1,:) % input sequence of bits
     end
-    %N = 512;
-    N = length(in_seq);
+    N = 512;
     J = zeros(1,N);
     P = [0 1 2 4 3 5 6 7 8 16 9 17 10 18 11 19 12 20 13 21 14 22 15 ...
           23 24 25 26 28 27 29 30 31]; % interleaving pattern
@@ -14,12 +13,12 @@ function out_seq = rateMatching(in_seq)
     sequence(1:N) = in_seq(J(1:N)+1); % main procedure
     N = length(sequence); % length of input sequence    
     E = 864; % lenght of output sequence [TS 38.212, 7.1.5]
-    K = 512; % length of output sequence of polar coder %%%512
-    if E >= N
+    K = 512; % length of output sequence of polar coder
+    if E >= N 
         out_seq(1:E) = sequence(mod(0:(E-1),N)+1);
         return
     elseif (K/E) <= (7/16)
-        out_seq(1:E) = sequence(1:E+N-E);
+        out_seq(1:E) = sequence(1:E+N-E); 
         return
     end
     out_seq(1:E) = sequence(1:E);
