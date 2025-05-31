@@ -14,15 +14,18 @@ end
 scrambled_bits = scrambling_pdcch(codeword, n_RNTI, nID);
 
 % getting scrambled sequence for matlab
+%{
+
 len = length(codeword);
 sequence_2 = nrPDCCHPRBS(nID, n_RNTI,len);
 sequence_2_2 = sequence_2'; 
 
 % getting the scrambling bits for matlab
 scrambled_bits_2 = mod(codeword + sequence_2_2,2);
-%scrambled_bits_2_2 = scrambled_bits_2';
+scrambled_bits_2_2 = scrambled_bits_2';
 
-isequal(scrambled_bits, scrambled_bits_2)
+isequal(scrambled_bits, scrambled_bits_2) % #3 - совпали
+%}
 
 % modulation QPSK. qpskModulation - взято у Валентина
 symbols = qpskModulation(scrambled_bits);

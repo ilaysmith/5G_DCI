@@ -1,10 +1,9 @@
 % функция coreset pdcch mapping 
-function [resource_grid,coreset_config] = fun_mapping(symbols,rbs_coreset,ssb_offset_crst,duration_crst,AL,NCellId)
+function [resource_grid,coreset_config] = fun_mapping(coreset_config, symbols,...
+    AL,NCellId)
 arguments
+    coreset_config
     symbols % qpsk pdcch 
-    rbs_coreset
-    ssb_offset_crst
-    duration_crst
     AL
     NCellId
     % можно будет добавить данные из SSB
@@ -13,12 +12,12 @@ end
 
     % 1. Для coreset 0 необходимы параметры из MIB
 
-    coreset_config.rbs = rbs_coreset; 
-    coreset_config.ssb_offset = ssb_offset_crst; 
-    coreset_config.duration = duration_crst; 
-    coreset_config.num_cces = AL;
+    %coreset_config.rbs = rbs_coreset; 
+    %coreset_config.ssb_offset = ssb_offset_crst; 
+    %coreset_config.duration = duration_crst; 
+    %coreset_config.num_cces = AL;
 
-    coreset_config.start_symbol = 7; % начало с 4-го символа
+    %coreset_config.start_symbol = 7; % начало с 4-го символа
     
     %coreset_config.symbols = [coreset_config.start_symbol,coreset_config.start_symbol + coreset_config.duration];
 
@@ -32,7 +31,7 @@ end
    % [blocks_pos,Lbarmax] = blocksByCase(case_letter,carrier,shared_spectrum);
 
 
-    coreset0_pos = calculate_coreset0_pos(coreset_config.ssb_offset, coreset_config.rbs,ssb_end_rb); % расчёт позиции coreset
+    coreset0_pos = calculate_coreset0_pos(coreset_config.ssb_offset_crst, coreset_config.size_rbs,ssb_end_rb); % расчёт позиции coreset
                                                                                                      % на ресурсной сетке
     coreset_config.freq_range = [coreset0_pos(1),coreset0_pos(length(coreset0_pos))]; % берём первый и последний символ
 
@@ -50,12 +49,12 @@ end
 end
 
 % Функция расчёта позиции coreset в частотной области
-function coreset_rbs = calculate_coreset0_pos(ssb_offset, coreset_rbs_duration,ssb_end_rb)
+function coreset_rbs = calculate_coreset0_pos(ssb_offset_crst, size_rbs,ssb_end_rb)
     % ssb_offset: смещение поднесущих SSB (из MIB)
     % coreset_rbs: число RB в CORESET0 
     % CORESET0 начинается после смещения
-    coreset_start_rb = floor((ssb_offset + ssb_end_rb)); % Смещение в RB 
-    coreset_rbs = coreset_start_rb : coreset_start_rb + (coreset_rbs_duration)/2- 1;
+    coreset_start_rb = floor((ssb_offset_crst + ssb_end_rb)); % Смещение в RB 
+    coreset_rbs = coreset_start_rb : coreset_start_rb + (size_rbs)/1- 1;
 end
 
 % Функция dmrs
@@ -82,7 +81,10 @@ function resource_grid = map_pdcch(symbols, coreset_config,NCellId,slot_num,symb
             channelBandwidth = 50;
             symbolsInHalfFrame = 2^config.mu * 14 * 5;
             symbolsAmount = symbolsInHalfFrame;
-            resource_grid = ResourceGrid(symbolsAmount, channelBandwidth, config.mu);
+           % resource_grid = ResourceGrid(symbolsAmount, channelBandwidth, config.mu);
+            NGridSize = 100;
+            mu =1;
+            resource_grid = ResourceMapper(NGridSize,nrCom.Nsymb_slot*nrCom.Nslot_frame(mu));
             
     % 2. Генерация DM-RS для каждого символа в CORESET
     for sym = coreset_config.start_symbol -1 : coreset_config.start_symbol + coreset_config.duration - 2
@@ -95,7 +97,7 @@ function resource_grid = map_pdcch(symbols, coreset_config,NCellId,slot_num,symb
             for k = 1:12
                 if mod(k-1, 4) == 0 % Позиции DM-RS: k = 1, 5, 9
                     re_pos = rb * 12 + k;
-                    resource_grid.resourceGrid(re_pos, sym + 1) = dmrs_symbols(dmrs_idx);
+                    resource_grid.resource_grid(re_pos, sym + 1) = dmrs_symbols(dmrs_idx);
                     dmrs_idx = dmrs_idx + 1;
                 end
             end
@@ -113,7 +115,7 @@ function resource_grid = map_pdcch(symbols, coreset_config,NCellId,slot_num,symb
             for k = 1:12
                 if mod(k-1, 4) ~= 0 % Не DM-RS
                     re_pos = rb * 12 + k;
-                    resource_grid.resourceGrid(re_pos, sym + 1) = symbols(reg_idx * 9 + re_in_reg);
+                    resource_grid.resource_grid(re_pos, sym + 1) = symbols(reg_idx * 9 + re_in_reg);
                     re_in_reg = re_in_reg + 1;
                 end
             end
