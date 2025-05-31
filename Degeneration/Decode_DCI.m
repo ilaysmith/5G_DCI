@@ -1,23 +1,19 @@
-function dcibits = Decode_DCI(...
-    dcicw,                         ... 
-    crc_type                       ... % must be "crc<length><?letter>" letter is only necessary crc24_
-    )
-
+% function Decode_DCI for dci sequence 
+function get_DM = Decode_DCI(received_codeword, crc_type)
 arguments
-    dcicw (1,:) % vector string
-    %bitstream
-    crc_type string
-    %attach_zeros=true
-
+    received_codeword
+    crc_type
 end
 
-% rate recovery
-dcibitsRR = rateRecovery(dcicw);
+% CRC   use crc_type = 'crc24c', bitstream = received_codeword . rateRecovery - взято
+% у Dimach24
+received_codeword = rateRecovery_2(received_codeword); % корректно. получаем тот же результат
 
-% polar decoding
-dcibitsPD = polarDecoding(dcibitsRR); 
+% Channel decoding. polarDecoding - взято у Dimach24
+received_codeword = polarDecoding_2(received_codeword); % не корректно. результат нули
 
-%verify parity
-[dcibits,verification_success] = verifyParity(dcibitsPD,crc_type);
+% verifeParity - взято у Dimach24
+get_DM = verifyParity_2(received_codeword, crc_type);
 
+%get_DM = received_codeword;
 end
