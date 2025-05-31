@@ -7,16 +7,17 @@
 
 % введём параметры для функции getDCI   unit test matlab, общий гит с 3-мя
 % папками. что то у ребят с ofdm как то встроить
-FDRA = 11; % 10,19967 округляется в большую сторону
+% denote getDCI parameters
+FDRA = 11;
 TDRA = 1;
 VrbPrb = 0;
 modulation_and_coding_scheme = 0;
 redundancy_Version = 0;
-sII = 0b0;
-reserved_bits = 0; % zeros(0,15)
+SII = 0;
+ReservedBits = zeros(1,15);
 
-% получим биты dci для формата format 1_0 в соответствие со стандартом
-DM = getDCI(FDRA, TDRA, VrbPrb,modulation_and_coding_scheme,redundancy_Version,sII, reserved_bits);
+% get dci format 1_0 according to the TS
+DM = genDCI(FDRA, TDRA, VrbPrb,modulation_and_coding_scheme,redundancy_Version, SII,ReservedBits);
 
 % закодируем биты полезной нагрузки 38.212 с использование CRC attachment (раздел 7.3.2),
 % Channel coding (7.3.3), Rate mathcing (раздел 7.3.4).
@@ -74,7 +75,7 @@ received_codeword = de_get_pdcch_symbols(pdcch_symbols_rev, nID, n_RNTI);
 % проверка на совпадение codeword - удачно
 isequal(codeword, received_codeword) % совпали №2
 
-% Произведём декодирование последовательности DCI.
+%Произведём декодирование последовательности DCI.
 get_DM = Decode_DCI(received_codeword, crc_type);
 
 isequal(get_DM, DM) % ура совпадает #3
