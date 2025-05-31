@@ -27,4 +27,18 @@ result.sII = sII_bit;
 result.reserved_bits = RB_bit;
 
 dci_block = result;
+
+disp(dci_block)
+
+if dci_block.VrbPrb == '0'
+    disp('VrbPrb = 0. Non_interleaved');
+else 
+    disp('VrbPrb = 1. interleaved');
+end
+
+if dci_block.sII == '0'
+    disp('sII = 0. SIB 1');
+else
+    disp('sII = 1. SI messages');
+end
 end
