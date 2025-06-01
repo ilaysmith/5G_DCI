@@ -18,7 +18,7 @@ end
 codeword = attachParityBits(dci,crc_type);
 
 % Channel coding
-codeword = polarCoding_2(codeword); 
+codeword = polarCoding(codeword); 
 
 % Rate matching 
 codeword = rateMatching(codeword);
