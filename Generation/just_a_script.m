@@ -190,9 +190,12 @@ disp(pld);
 
 % parse for pdcch
 %[sym_p, dmrs_p] = parsePdcch(pdcch, 0, 0,cfgDL.NCellID);
-[pdcch_symbols_rev] = de_mapping(received, cfgDL.NCellID, coreset_config);
-symbols_received = pdcch_symbols_rev.';
-isequal(symbols,symbols_received) % почему ноль? 
+[pdcch_symbols_rev,dmrs_symbols_pdcch] = de_mapping(received, coreset_config);
+symbols_received = pdcch_symbols_rev.'; % 432
+%isequal(symbols,symbols_received) % почему ноль? 
+% dmrs pdcch
+dmrs_pdcch = dmrs_symbols_pdcch.'; % 144
+% 48rbs = 48 * 12 = 576. 576 - 144 = 432 -> каждый 4-ый
 
 % вытащим закодированные биты из qpsk
 received_codeword = de_get_pdcch_symbols(symbols_received, cfgDL.NCellID, n_RNTI);
