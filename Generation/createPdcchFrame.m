@@ -34,13 +34,13 @@ if inf_13_4 == 15
     coreset_config.size_rbs = 48; % RBs
 end
 
-dci_config.FDRA = ceil(log2(coreset_config.size_rbs*(coreset_config.size_rbs+1)/2));
+dci_config.FDRA = 10; %ceil(log2(coreset_config.size_rbs*(coreset_config.size_rbs+1)/2));
 %FDRA = 11; % 10,19967 rounded up
-dci_config.reserved_bits = 0; % zeros(0,15) 
+dci_config.reserved_bits = zeros(1,15) ;
 
 
 % get the bits dci for format 1_0 
-DM = getDCI(dci_config.FDRA, dci_config.TDRA, dci_config.VrbPrb,dci_config.macs,...
+DM = genDCI(dci_config.FDRA, dci_config.TDRA, dci_config.VrbPrb,dci_config.macs,...
     dci_config.rv,dci_config.sII,dci_config.reserved_bits);
 
 % encode the payload bits 38.212 with use CRC attachment (7.3.2),
