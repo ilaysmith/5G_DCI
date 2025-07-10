@@ -36,7 +36,14 @@ function [data_with_crc,crc]=attachParityBits(bitstream,crc_type,attach_zeros)
     % reverse of the indexes (indexes are in 
     % the least significant order, but bits 
     % are in the most significant order).
-    Dpos=25-Dpos;
+    if N == 16
+        Dpos = 13 - Dpos;
+    else
+        Dpos=25-Dpos;
+    end
+
+    %Dpos=25-Dpos;
+    
     L=length(bitstream);
 
     if attach_zeros

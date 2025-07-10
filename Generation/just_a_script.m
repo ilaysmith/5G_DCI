@@ -81,20 +81,17 @@ mib.intraFreqReselection=nrCom.IntraFreqReselection.notAllowed;
     mib, ...
     0);
 
+
+% DCI
 %param for dci from MIB
 crc_type = 'crc24c';
 % for DCI sequence
-%rbs_coreset = 48;   
-%ssb_offset_crst = 15; % from mib
-%duration_crst = 2; % for coreset 0 choose 1 or 2
-AL = 4; % agregation level 
-%TDRA = 1;                        
-%VrbPrb = 0;                       
-%macs = 0;                        
-%rv = 0;                            
-%sII = 0b0;    
+AL = 4; % agregation level     
 NCellId = 17;
 n_RNTI = 65535; % задано стандартом 65535
+% param for sib1
+LRbs_sib1 = 10; % length allocated resource blocks
+RBstart_sib1 = 30; % Start RB for SIB1
 
 dci_config = struct(); % size_rbs for Frequence domain resource assigments
 dci_config.TDRA = 1; % Time domain resource assigments
@@ -103,23 +100,31 @@ dci_config.macs = 0; % modulation and coding scheme
 dci_config.rv = 0; % redundancy Version.
 dci_config.sII = 0; % System Information Indicator. SIB 1
 
-
 coreset_config = struct(); % coreset config
-%coreset_config.start_symbol; % начало с 7-го символа  mib
-%coreset_config.duration;
-%coreset_config.ssb_offset_crst;
-%coreset_config.size_rbs;
-[rg_pdcch,symbols,coreset_config] = createPdcchFrame(crc_type,coreset_config,dci_config,...
-    NCellId, AL, mib.pdcch_ConfigSIB1);
-rg_general = rg + rg_pdcch.resource_grid;
+
+% RG PDCCH
+[rg_pdcch,symbols,coreset_config,dci_config] = createPdcchFrame(crc_type,coreset_config,dci_config,...
+    NCellId, AL, mib.pdcch_ConfigSIB1,LRbs_sib1,RBstart_sib1);
+
+% SIB1
+dmrsTypeAPosition = 2; % pos2 (For Sib1 + TDRA)
+codeword_sib1 = get_sib1_codeword(dci_config,coreset_config,dmrsTypeAPosition); % get sib1 codeword
+
+sib1_config = struct(); % sib1 config
+
+rg_pdsch = createPdschFrame(coreset_config,dci_config,sib1_config,codeword_sib1,...
+    NCellId,n_RNTI,dmrsTypeAPosition);
+
+% RG GENERAL
+rg_general = rg + rg_pdcch.resource_grid + rg_pdsch.resource_grid;
 %%
-%figure
-%subplot(1,2,2)
-%pcolor(abs(rg_general)); shading flat;
-%title("MODEL FRAME RG")
-%subplot(1,2,1)
-%pcolor(abs(nrOFDMDemodulate(toolbox_waveform,NRB,15,0))); shading flat;
-%title("MATLAB TOOLBOX RG")
+figure
+subplot(1,2,2)
+pcolor(abs(rg_general)); shading flat;
+title("MODEL FRAME RG")
+subplot(1,2,1)
+pcolor(abs(nrOFDMDemodulate(toolbox_waveform,NRB,15,0))); shading flat;
+title("MATLAB TOOLBOX RG")
 %%
 
 waveform=ofdmModulator(rg_general,bwp.NStartBWP,round(log2(scscarrier.SubcarrierSpacing/15)),0);
@@ -205,6 +210,12 @@ get_DM = Decode_DCI(received_codeword, crc_type);
 
 dci_block = parser_dci(get_DM); % parser_dci
 %disp(dci_block)
+
+% SIB1
+%de_mapping sib1
+%de_get_pdcch_symbols_sib1
+%decode_sib1
+% parser_sib1
 
 
 %% %

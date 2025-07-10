@@ -1,5 +1,5 @@
-function [resource_grid,symbols,coreset_config] = createPdcchFrame(...
-    crc_type,coreset_config, dci_config,NCellId,AL,pdcch_ConfigSIB1)
+function [resource_grid,symbols,coreset_config,dci_config] = createPdcchFrame(...
+    crc_type,coreset_config, dci_config,NCellId,AL,pdcch_ConfigSIB1,LRbs_sib1,RBstart_sib1)
 arguments 
     crc_type            % type crc
     coreset_config      % config coreset
@@ -7,14 +7,9 @@ arguments
     NCellId             % NCellId
     AL                  % Agrigation level
     pdcch_ConfigSIB1    % Information from MIB
+    LRbs_sib1           % duration fo rbs sib1
+    RBstart_sib1        % start rb for sib1
 end
-
-
-%dci_config.TDRA;
-%dci_config.VrbPrb;
-%dci_config.macs;
-%dci_config.rv;
-%dci_config.sII;
 
 b_pdcch_ConfigSIB1 = dec2bin(pdcch_ConfigSIB1);
 b_inf_13_4 = b_pdcch_ConfigSIB1(1:4);
@@ -34,13 +29,24 @@ if inf_13_4 == 15
     coreset_config.size_rbs = 48; % RBs
 end
 
-dci_config.FDRA = 10; %ceil(log2(coreset_config.size_rbs*(coreset_config.size_rbs+1)/2));
+dci_config.FDRA = ceil(log2(coreset_config.size_rbs*(coreset_config.size_rbs+1)/2));
 %FDRA = 11; % 10,19967 rounded up
 dci_config.reserved_bits = zeros(1,15) ;
 
+% Get RIV - Resource Indication Value. 38.214 5.2.2.2. For frequency domain
+% 6.1.2.2.2
+
+if (LRbs_sib1 - 1) <= coreset_config.size_rbs/2
+    RIV = coreset_config.size_rbs*(LRbs_sib1 - 1) + RBstart_sib1;
+else
+    RIV = coreset_config.size_rbs*(coreset_config.size_rbs - LRbs_sib1 + 1) + (coreset_config.size_rbs - 1 - RBstart_sib1);
+end
+
+RIV_bits = int2bit(RIV,dci_config.FDRA).'; % lenght 11 bits. 462 payload
+dci_config.RIV_bits = RIV_bits;
 
 % get the bits dci for format 1_0 
-DM = genDCI(dci_config.FDRA, dci_config.TDRA, dci_config.VrbPrb,dci_config.macs,...
+DM = genDCI(RIV_bits, dci_config.TDRA, dci_config.VrbPrb,dci_config.macs,...
     dci_config.rv,dci_config.sII,dci_config.reserved_bits);
 
 % encode the payload bits 38.212 with use CRC attachment (7.3.2),

@@ -1,6 +1,6 @@
 %DCI format 1_0 with CRC scrambled by SI-RNTI
 function dci = genDCI(                     ...
-    FDRA,                                  ...%FrequencyDomainResourceAssignment
+    RIV_bits,                              ...%ResourceIndicationValue
     TDRA,                                  ...%TimeDomainResourceAssignment
     VRB_to_PRB,                            ...%VRB_to_PRB
     ModulationAndCodingScheme,             ...%ModulationAndCodingScheme
@@ -9,9 +9,9 @@ function dci = genDCI(                     ...
     ReservedBits                           ...%ReservedBits
     )
     arguments
-        %FrequencyDomainResourceAssignment: ceil(log2(NRB_DLBWP *(NRB_DLBWP + 1) / 2)) = 11
-        %NRB_DLBWP = CORESET0 size (48) 
-        FDRA (1,1) {mustBeInteger,mustBeNonnegative}
+        %FrequencyDomainResourceAssignment + ResourceIndicationValue: ceil(log2(NRB_DLBWP *(NRB_DLBWP + 1) / 2)) = 11
+        %NRB_DLBWP = CORESET0 size (48) and 
+        RIV_bits 
 
         %5.1.2.1 TS38.214, 4 bits
         TDRA (1,1) {mustBeInteger,mustBeNonnegative}
@@ -35,10 +35,10 @@ function dci = genDCI(                     ...
     end
 
     
-    FDRA = int2bit(FDRA,11).';
+    %FDRA = int2bit(FDRA,11).';
     TDRA = int2bit(TDRA,4).';
     ModulationAndCodingScheme = int2bit(ModulationAndCodingScheme,5).';
     RedundancyVersion = int2bit(RedundancyVersion,2).';
 
-dci = [FDRA TDRA VRB_to_PRB ModulationAndCodingScheme RedundancyVersion SII  ReservedBits];
+dci = [RIV_bits TDRA VRB_to_PRB ModulationAndCodingScheme RedundancyVersion SII  ReservedBits];
 end

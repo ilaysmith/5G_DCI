@@ -8,8 +8,6 @@ arguments
     NCellId
     % можно будет добавить данные из SSB
 end
-   
-
     % 1. Для coreset 0 необходимы параметры из MIB
 
     %coreset_config.rbs = rbs_coreset; 
@@ -18,31 +16,18 @@ end
     %coreset_config.num_cces = AL;
 
     %coreset_config.start_symbol = 7; % начало с 4-го символа
-    
-    %coreset_config.symbols = [coreset_config.start_symbol,coreset_config.start_symbol + coreset_config.duration];
 
     % 2. Произведём маппирование coreset 
     ssb_end_rb = 25; % отыскать! ПОКА ЧТО КОСТЫЛЬ
 
-    % попробуем не костыль
-    %shared_spectrum = false;
-    %case_letter ="Case B";
-    %carrier = 4e9;
-   % [blocks_pos,Lbarmax] = blocksByCase(case_letter,carrier,shared_spectrum);
-
-
-    coreset0_pos = calculate_coreset0_pos(coreset_config.ssb_offset_crst, coreset_config.size_rbs,ssb_end_rb); % расчёт позиции coreset
-                                                                                                     % на ресурсной сетке
+    coreset0_pos = calculate_coreset0_pos(coreset_config.ssb_offset_crst, coreset_config.size_rbs,ssb_end_rb);
+    % расчёт позиции coreset на ресурсной сетке
     coreset_config.freq_range = [coreset0_pos(1),coreset0_pos(length(coreset0_pos))]; % берём первый и последний символ
 
     % 3. Зададим параметры SSB - заменить на параметры ребят
-    %ssb_config.freq_range = [6, 25];       % SSB занимает RB 6-25 
-    %ssb_config.ssb_symbols = [3, 7];       % Символы 3-8
     slot_num = 1;
     symbol_num = 7;
-    num_rb = coreset_config.freq_range(2) - coreset_config.freq_range(1) + 1;
-   % dmrs = generate_pdcch_dmrs(NCellId, slot_num, symbol_num,num_rb);
-    
+    num_rb = coreset_config.freq_range(2) - coreset_config.freq_range(1) + 1;    
 
     % 4. Получим ресурсную сетку
     resource_grid = map_pdcch(symbols, coreset_config,NCellId,slot_num,symbol_num,num_rb); % маппирование PDCCH на ресурсную сетку 
@@ -72,16 +57,7 @@ end
 
 % Функция маппирования на ресурсную сетку PDCCH
 function resource_grid = map_pdcch(symbols, coreset_config,NCellId,slot_num,symbol_num,num_rb)
-            % Get resource grid configuration
-            caseLetter = 'C';
-            absolutePointA = 4;
-            config = caseConfiguration(caseLetter,absolutePointA);
-
-            % Create resource grid
-            channelBandwidth = 50;
-            symbolsInHalfFrame = 2^config.mu * 14 * 5;
-            symbolsAmount = symbolsInHalfFrame;
-           % resource_grid = ResourceGrid(symbolsAmount, channelBandwidth, config.mu);
+           % Create resource grid
             NGridSize = 100;
             mu =1;
             resource_grid = ResourceMapper(NGridSize,nrCom.Nsymb_slot*nrCom.Nslot_frame(mu));

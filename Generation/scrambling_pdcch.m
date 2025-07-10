@@ -12,6 +12,7 @@ cinit = mod(double(n_RNTI)*2^16 + double(nID),2^31);
 % getting the scrambling sequence c(i)          
 % 5.2.1 38.211 + 7.3.2.3
 sequence = get_sequence(codeword, cinit);
+codeword = double(codeword);
 
 % getting the scrambling bits 
 srcambling_bits = mod(codeword + sequence,2);
