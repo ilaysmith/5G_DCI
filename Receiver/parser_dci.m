@@ -15,7 +15,8 @@ RV_bit = bit_string(22:23);     % 2 бита для redundancy_Version
 sII_bit = bit_string(24);       % 1 бит для sII
 RB_bit = bit_string(25:end);    % Последние 15 бит для reserved_bits
 
-FDRA = bin2dec(FDRA_bit); % Переводим 11 бит в десятичное число
+RIV = bin2dec(FDRA_bit); % Переводим 11 бит в десятичное число
+FDRA = length(FDRA_bit);
 TDRA = bin2dec(TDRA_bit); % Переводим 4 бита в десятичное число
 
 result.FDRA = FDRA;
