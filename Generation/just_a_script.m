@@ -96,7 +96,7 @@ RBstart_sib1 = 30; % Start RB for SIB1
 dci_config = struct(); % size_rbs for Frequence domain resource assigments
 dci_config.TDRA = 1; % Time domain resource assigments
 dci_config.VrbPrb = 0; % VRB-PRB mapping. Non-Interleaved for coreset 0
-dci_config.macs = 0; % modulation and coding scheme
+dci_config.macs = 11; % modulation and coding scheme % 11 for 38.214 5.1.3.2-1 104 TBS
 dci_config.rv = 0; % redundancy Version.
 dci_config.sII = 0; % System Information Indicator. SIB 1
 
@@ -108,11 +108,14 @@ coreset_config = struct(); % coreset config
 
 % SIB1
 dmrsTypeAPosition = 2; % pos2 (For Sib1 + TDRA)
-codeword_sib1 = get_sib1_codeword(dci_config,coreset_config,dmrsTypeAPosition); % get sib1 codeword
+PDSCH_mapping_type = 1; % A
+[codeword_sib1,encoded,word] = get_sib1_codeword(dci_config,coreset_config,dmrsTypeAPosition); % get sib1 codeword
 
 sib1_config = struct(); % sib1 config
+sib1_config.RIV_bits = dci_config.RIV_bits;
+sib1_config.map_type = PDSCH_mapping_type;
 
-rg_pdsch = createPdschFrame(coreset_config,dci_config,sib1_config,codeword_sib1,...
+[rg_pdsch,sib1_config]  = createPdschFrame(coreset_config,dci_config,sib1_config,codeword_sib1,...
     NCellId,n_RNTI,dmrsTypeAPosition);
 
 % RG GENERAL
@@ -211,11 +214,21 @@ get_DM = Decode_DCI(received_codeword, crc_type);
 dci_block = parser_dci(get_DM); % parser_dci
 %disp(dci_block)
 
-% SIB1
-%de_mapping sib1
-%de_get_pdcch_symbols_sib1
-%decode_sib1
-% parser_sib1
+
+
+% parse for pdsch 
+[pdsch_symbols_rev,dmrs_symbols_pdsch] = de_mapping_pdsch(received, coreset_config, sib1_config,dci_config);
+symbols_pdsch_received = pdsch_symbols_rev.';
+
+% вытащим закодированные биты из qpsk
+received_codeword_pdsch = de_get_pdcch_symbols(symbols_pdsch_received, cfgDL.NCellID, n_RNTI);
+
+% Произведём декодирование последовательности DCI.
+word_sib1 = de_get_sib1_codeword(received_codeword_pdsch,encoded,word,dci_config);
+
+%sib1_block = parser_sib1(word_sib1); % parser_sib1 в разработке
+%disp(sib1_block)
+
 
 
 %% %
